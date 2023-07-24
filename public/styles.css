@@ -1,0 +1,16 @@
+/* styles.css */
+
+/* Default text color */
+li {
+    color: black;
+}
+
+/* Red color for negative percentage */
+.red-text {
+    color: #480202;
+}
+
+/* Green color for positive percentage */
+.green-text {
+    color: #00411e;
+}
