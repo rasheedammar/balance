@@ -79,15 +79,18 @@ app.get('/data', async (req, res) => {
             api2: api2Results.sort((account1, account2) => account2.balance - account1.balance),
         };
 
-        data.api1.forEach((result) => {
-            result.percentage = ((result.balance - result.capital) / result.capital * 100).toFixed(1) + '%';
-            result.percentageColor = result.percentage.includes('-') ? '#00411e' : '#480202';
-        });
 
-        data.api2.forEach((result) => {
-            result.percentage = ((result.balance - result.capital) / result.capital * 100).toFixed(1) + '%';
-            result.percentageColor = result.percentage.includes('-') ? '#00411e' : '#480202';
-        });
+// Function to create the HTML list item for an API result
+function createListItem(account) {
+    const listItem = document.createElement('li');
+    listItem.innerHTML = `
+        <strong>Account Name:</strong> ${account.name}, 
+        <strong>Balance:</strong> $${account.balance}, 
+        <strong>Percentage:</strong> <span class="percentage ${account.percentage >= 0 ? 'positive-percentage' : 'negative-percentage'}">${account.percentage}</span>`;
+    return listItem;
+}
+
+
 
         res.json(data);
     } catch (error) {
