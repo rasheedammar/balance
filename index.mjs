@@ -55,35 +55,27 @@ app.use(express.static('public'));
             try {
                 const api1Results = await Promise.all(api1Ids.map(async (id) => {
                     const account = await api1.accountLoadBalances(id);
-                    // Process the account data and return the required object format
-                    const balance = Math.floor(account?.primary_display_currency_amount?.amount) || 0;
                     const capital = capitalMap.get(id) || 0;
-                    const percentage = ((balance - capital) / capital * 100).toFixed(1);
-                    const percentageColor = percentage >= 0 ? 'positive-percentage' : 'negative-percentage';
+                    const balance = Math.floor(account?.primary_display_currency_amount?.amount) || 0;
+                
                     return {
                         id,
                         name: account?.name,
                         balance,
                         capital,
-                        percentage: percentage + '%',
-                        percentageColor,
                     };
                 }));
-        
+                
                 const api2Results = await Promise.all(api2Ids.map(async (id) => {
                     const account = await api2.accountLoadBalances(id);
-                    // Process the account data and return the required object format
-                    const balance = Math.floor(account?.primary_display_currency_amount?.amount) || 0;
                     const capital = capitalMap.get(id) || 0;
-                    const percentage = ((balance - capital) / capital * 100).toFixed(1);
-                    const percentageColor = percentage >= 0 ? 'positive-percentage' : 'negative-percentage';
+                    const balance = Math.floor(account?.primary_display_currency_amount?.amount) || 0;
+                
                     return {
                         id,
                         name: account?.name,
                         balance,
                         capital,
-                        percentage: percentage + '%',
-                        percentageColor,
                     };
                 }));
         
