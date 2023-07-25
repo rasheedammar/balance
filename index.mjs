@@ -19,6 +19,7 @@ const api2 = new threeCommasAPI({
 });
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 
 const publicDirectoryPath = path.join(__dirname, 'public');
@@ -46,64 +47,54 @@ const capitalMap = new Map([
 
 app.use(express.static('public'));
 
-
- const api1Ids = [32101201, 31876293, 32103676, 32178454, 32427154, 32427107, 32428979, 32433201, 32427159, 31814867];
+app.get('/data', async (req, res) => {
+    try {
+        const api1Ids = [32101201, 31876293, 32103676, 32178454, 32427154, 32427107, 32428979, 32433201, 32427159, 31814867];
         const api2Ids = [32208556, 32268993, 32423648, 32244363, 32244371, 32423630, 32435532];
 
+        const api1Results = await Promise.all(api1Ids.map(async (id) => {
+            const account = await api1.accountLoadBalances(id);
+            // Process the account data and return the required object format
+            return {
+                id,
+                name: account?.name,
+                balance: Math.floor(account?.primary_display_currency_amount?.amount) || 0,
+                capital: capitalMap.get(id) || 0,
+            };
+        }));
 
-        app.get('/data', async (req, res) => {
-            try {
-                const api1Results = await Promise.all(api1Ids.map(async (id) => {
-                    const account = await api1.accountLoadBalances(id);
-                    const capital = capitalMap.get(id) || 0;
-                    const balance = Math.floor(account?.primary_display_currency_amount?.amount) || 0;
-                
-                    return {
-                        id,
-                        name: account?.name,
-                        balance,
-                        capital,
-                    };
-                }));
-                
-                const api2Results = await Promise.all(api2Ids.map(async (id) => {
-                    const account = await api2.accountLoadBalances(id);
-                    const capital = capitalMap.get(id) || 0;
-                    const balance = Math.floor(account?.primary_display_currency_amount?.amount) || 0;
-                
-                    return {
-                        id,
-                        name: account?.name,
-                        balance,
-                        capital,
-                    };
-                }));
-        
-                const data = {
-                    api1: api1Results.sort((account1, account2) => account2.balance - account1.balance),
-                    api2: api2Results.sort((account1, account2) => account2.balance - account1.balance),
-                };
-        
-                res.json(data);
-            } catch (error) {
-                res.status(500).json({ error: 'Error fetching balances from APIs' });
-            }
+        const api2Results = await Promise.all(api2Ids.map(async (id) => {
+            const account = await api2.accountLoadBalances(id);
+            // Process the account data and return the required object format
+            return {
+                id,
+                name: account?.name,
+                balance: Math.floor(account?.primary_display_currency_amount?.amount) || 0,
+                capital: capitalMap.get(id) || 0,
+            };
+        }));
+
+        const data = {
+            api1: api1Results.sort((account1, account2) => account2.balance - account1.balance),
+            api2: api2Results.sort((account1, account2) => account2.balance - account1.balance),
+        };
+
+        data.api1.forEach((result) => {
+            result.percentage = ((result.balance - result.capital) / result.capital * 100).toFixed(1) + '%';
+            result.percentageColor = result.percentage.includes('-') ? '#069247' : '#480202';
         });
-        
-        // Function to create the HTML list item for an API result
-        function createListItem(account) {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `
-                <strong>Account Name:</strong> ${account.name}, 
-                <strong>Balance:</strong> $${account.balance}, 
-                <strong>Percentage:</strong> <span class="percentage ${account.percentageColor}">${account.percentage}</span>`;
-            return listItem;
-        }
 
+        data.api2.forEach((result) => {
+            result.percentage = ((result.balance - result.capital) / result.capital * 100).toFixed(1) + '%';
+            result.percentageColor = result.percentage.includes('-') ? '#069247' : '#480202';
+        });
 
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching balances from APIs' });
+    }
+});
 
-        const port = 3000;
-
-        app.listen(port, () => {
-            console.log(`Server is running on port ${port}`);
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
