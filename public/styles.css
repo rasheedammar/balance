@@ -1,9 +1,16 @@
-/* Add a class to style positive percentages in green */
-.positive-percentage {
-    color: #00FF00;
+/* styles.css */
+
+/* Default text color */
+li {
+    color: black;
 }
 
-/* Add a class to style negative percentages in red */
-.negative-percentage {
-    color: #FF0000;
+/* Red color for negative percentage */
+.red-text {
+    color: #480202;
+}
+
+/* Green color for positive percentage */
+.green-text {
+    color: #069247;
 }
